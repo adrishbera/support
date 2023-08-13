@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title> Support Bot </title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 16px;
+    }
+
+    #chatpage {
+      width: 85%; /* Increased width to 85% */
+      margin: 0 auto;
+      text-align: left; /* Changed text-align to left */
+    }
+
+    #chat {
+      width: 100%; /* Set width to 100% to match #chatpage */
+      height: 400px;
+      overflow-y: scroll;
+      padding: 10px;
+      border: 1px solid #ccc;
+      box-sizing: border-box; /* Added box-sizing */
+    }
+
+    #input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-top: none;
+    }
+
+    #button {
+      display: block;
+      width: 25%;
+      padding: 10px;
+      background-color: #4CAF50;
+      color: white;
+      text-align: center;
+      cursor: pointer;
+      margin: auto;
+      border-radius: 20px;
+    }
+
+    #summarybtn,
+    #resetbtn {
+      display: block;
+      width: 25%;
+      padding: 10px;
+      background-color: #909f90;
+      color: white;
+      text-align: center;
+      cursor: pointer;
+      float: left;
+      border-radius: 20px;
+      margin-top: 10px;
+    }
+
+    .button-container {
+      display: flex;
+      justify-content: right;
+      margin-top: 10px;
+      display: block;
+      padding: 10px;
+      background-color: #4CAF50;
+      width: 100px;
+      color: black;
+      text-align: center;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+    }
+
+    #jsonView {
+      width: 100%;
+      height: 200px;
+      border: 2px solid;
+    }
+
+    .three-dots-loading {
+      display: inline-block;
+      position: relative;
+      width: 64px;
+      height: 64px;
+    }
+
+    .three-dots-loading div {
+      position: absolute;
+      top: 27px;
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      background-color: #fff;
+      animation-timing-function: cubic-bezier(0, 1, 1, 0);
+    }
+
+    .three-dots-loading div:nth-child(1) {
+      left: 6px;
+      animation: three-dots-loading-animation 0.6s infinite;
+    }
+
+    .three-dots-loading div:nth-child(2) {
+      left: 6px;
+      animation: three-dots-loading-animation 0.6s 0.2s infinite;
+    }
+
+    .three-dots-loading div:nth-child(3) {
+      left: 26px;
+      animation: three-dots-loading-animation 0.6s 0.4s infinite;
+    }
+
+    @keyframes three-dots-loading-animation {
+      0% {
+        transform: scale(0);
+      }
+
+      100% {
+        transform: scale(1);
+        opacity: 0;
+      }
+    }
+
+    /* Styling for the fine print disclaimer */
+    .disclaimer {
+      font-size: 14px;
+      color: #7b96d1;
+      width: 85%; /* Match width with #chatpage */
+      margin: 10px auto; /* Center alignment and margin added */
+    }
+
+    .disclaimer a {
+      color: #666;
+      text-decoration: underline;
+    }
+
+    .disclaimer a:hover {
+      color: #333;
+    }
+  </style>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+
+<body style="background: rgba(26, 55, 87, 0.88); background-size: cover; color: white; font-family: 'Source Sans Pro','Helvetica Neue',Helvetica,Arial,sans-serif;">
+  <div class="disclaimer">
+    Dietpro's AI chatbot, powered by ChatGPT, provides information based on patterns from a dataset. It is not professional advice or a substitute for human interaction. Dietpro does not guarantee accuracy and is not liable for damages resulting from reliance on the chatbot's responses.
+  </div>
+
+  <div id="chatpage">
+    <label style="font-weight: bolder; text-align: center;"> DietPRO Bot </label>
+    <div id="chat"></div>
+    <input type="text" id="input" placeholder="Type a message...">
+    <button id="button">Send</button>
+  </div>
+
+  <button id="summarybtn" style="display: none;">Dietary Plan</button>
+  <button id="resetbtn" style="display: none;">Clear Conversation</button>
+
+  <div id="jsonview" style="width: 100%; height: 600px; margin-top: 50px; border: 2px solid; color: black; background-color: white; display: none; overflow: auto;"></div>
+</body>
+
+</html>
+
+  <script>
+    var chatHistory = [];
+    var url = 'https://j93ftpd7sa.execute-api.ap-south-1.amazonaws.com/beta';
+    
+
+    function sendMessage() {
+      var input = $('#input');
+      var chat = $('#chat');
+      var message = input.val();
+      if (message) {
+        chat.append('<div><strong>You:</strong> ' + message + '</div>');
+        input.val('');
+        chatHistory.push({
+          speaker: 'user',
+          message: message
+        });
+        chat.append('<div id="loader" class="three-dots-loading"> <div></div><div></div><div></div> </div>');
+
+        $.ajax({
+          type: 'POST',
+          url: url,
+          contentType: 'application/json',
+          data: JSON.stringify({
+            prompt: message,
+            chat_history: chatHistory
+          }),
+          success: function (reply) {
+            console.log(reply);
+            $('#loader').remove();
+            chat.append('<div><strong>DietPRO:</strong> ' + reply.body + '</div>');
+            chat.scrollTop(chat.prop('scrollHeight'));
+            chatHistory.push({
+              speaker: 'assistant',
+              message: reply.body
+            });
+
+            $('#jsonview').show();
+            $('#summarybtn').show();
+            $('#resetbtn').show();
+          }
+        });
+      }
+    }
+
+
+    function restchat() {
+      $('#chat').html('');
+      chatHistory = []
+      $('#jsonview').html('')
+      $('#jsonview').hide();
+      $('#summarybtn').hide();
+      $('#resetbtn').hide();
+
+    }
+
+
+
+
+    function showSummary() {
+      var jsonview = $('#jsonview');
+      jsonview.html('Loading....');
+      $.ajax({
+        type: 'POST',
+        url: url,
+        contentType: 'application/json',
+        data: JSON.stringify({
+          prompt: '_SHOW_SUMMARY_',
+          chat_history: chatHistory
+        }),
+        success: function (reply) {
+          console.log(reply);
+          jsonview.text('loading....');
+          let formattedText = reply.body.replace(/\n/g, "<br/>");
+          jsonview.html(JSON.stringify(formattedText));
+        }
+      });
+    }
+
+    $('#button').click(sendMessage);
+    $('#input').keydown(function (event) {
+      if (event.keyCode === 13) {
+        sendMessage();
+      }
+    });
+
+    $('#summarybtn').click(showSummary);
+    $('#resetbtn').click(restchat);
+  </script>
+</body>
+
+</html>
