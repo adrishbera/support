@@ -145,17 +145,17 @@
 
 <body style="background: rgba(26, 55, 87, 0.88); background-size: cover; color: white; font-family: 'Source Sans Pro','Helvetica Neue',Helvetica,Arial,sans-serif;">
   <div class="disclaimer">
-    Dietpro's AI chatbot, powered by ChatGPT, provides information based on patterns from a dataset. It is not professional advice or a substitute for human interaction. Dietpro does not guarantee accuracy and is not liable for damages resulting from reliance on the chatbot's responses.
+    Support AI chatbot, powered by ChatGPT, provides information based on patterns from ChatGPT training dataset and information provided by the knowledge database of PFT Application support. Support Bot does not guarantee accuracy of the information. When in doubt, please refer to the specific SOP/ support documentation and/or contact a senior in your department.
   </div>
 
   <div id="chatpage">
-    <label style="font-weight: bolder; text-align: center;"> DietPRO Bot </label>
+    <label style="font-weight: bolder; text-align: center;"> Support Bot </label>
     <div id="chat"></div>
     <input type="text" id="input" placeholder="Type a message...">
     <button id="button">Send</button>
   </div>
 
-  <button id="summarybtn" style="display: none;">Dietary Plan</button>
+  <button id="summarybtn" style="display: none;">Summary</button>
   <button id="resetbtn" style="display: none;">Clear Conversation</button>
 
   <div id="jsonview" style="width: 100%; height: 600px; margin-top: 50px; border: 2px solid; color: black; background-color: white; display: none; overflow: auto;"></div>
@@ -192,7 +192,7 @@
           success: function (reply) {
             console.log(reply);
             $('#loader').remove();
-            chat.append('<div><strong>DietPRO:</strong> ' + reply.body + '</div>');
+            chat.append('<div><strong>Support Bot:</strong> ' + reply.body + '</div>');
             chat.scrollTop(chat.prop('scrollHeight'));
             chatHistory.push({
               speaker: 'assistant',
